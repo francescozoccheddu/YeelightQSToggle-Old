@@ -25,5 +25,6 @@ public class WifiReceiver extends BroadcastReceiver {
         Intent mIntent = new Intent(context, QuickSettingsService.class);
         mIntent.putExtra(QuickSettingsService.INTENT_KEY_ENABLED, enabled);
         context.startService(mIntent);
+
     }
 }

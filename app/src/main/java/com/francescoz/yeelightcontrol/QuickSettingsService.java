@@ -15,10 +15,10 @@
 package com.francescoz.yeelightcontrol;
 
 import android.content.Intent;
+import android.graphics.drawable.Icon;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.BufferedOutputStream;
 import java.net.Socket;
@@ -34,7 +34,6 @@ public class QuickSettingsService
     @Override
     public void onClick() {
         Log.d(this.getClass().getSimpleName(), "onClick");
-        Toast.makeText(this, "onClick", Toast.LENGTH_SHORT).show();
 
         new Thread(new Runnable() {
             @Override
@@ -59,54 +58,17 @@ public class QuickSettingsService
 
         boolean enabled = intent.getBooleanExtra(INTENT_KEY_ENABLED, false);
         Tile tile = getQsTile();
-        tile.setState(enabled ? Tile.STATE_ACTIVE : Tile.STATE_UNAVAILABLE);
+        if (enabled) {
+            tile.setIcon(Icon.createWithResource(getApplicationContext(),
+                    R.drawable.ic_lightbulb_outline_black_24dp));
+            tile.setState(Tile.STATE_ACTIVE);
+        } else {
+            tile.setIcon(Icon.createWithResource(getApplicationContext(),
+                    R.drawable.ic_lightbulb_outline_white_24dp));
+            tile.setState(Tile.STATE_UNAVAILABLE);
+        }
         tile.updateTile();
         return START_STICKY;
     }
 
-    /*
-    // Changes the appearance of the tile.
-    private void updateTile() {
-
-        Tile tile = this.getQsTile();
-
-        Icon newIcon;
-        String newLabel;
-        int newState;
-
-        // Change the tile to match the service status.
-        if (isActive) {
-
-            newLabel = String.format(Locale.US,
-                    "%s %s",
-                    getString(R.string.tile_label),
-                    getString(R.string.service_active));
-
-            newIcon = Icon.createWithResource(getApplicationContext(),
-                    R.drawable.ic_android_black_24dp);
-
-            newState = Tile.STATE_ACTIVE;
-
-        } else {
-            newLabel = String.format(Locale.US,
-                    "%s %s",
-                    getString(R.string.tile_label),
-                    getString(R.string.service_inactive));
-
-            newIcon =
-                    Icon.createWithResource(getApplicationContext(),
-                            android.R.drawable.ic_dialog_alert);
-
-            newState = Tile.STATE_INACTIVE;
-        }
-
-        // Change the UI of the tile.
-        tile.setLabel(newLabel);
-        tile.setIcon(newIcon);
-        tile.setState(newState);
-
-        // Need to call updateTile for the tile to pick up changes.
-        tile.updateTile();
-    }
-    */
 }
