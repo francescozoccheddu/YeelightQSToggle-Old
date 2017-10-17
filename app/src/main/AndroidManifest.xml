@@ -3,6 +3,7 @@
     package="com.francescoz.yeelightcontrol">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 
     <application
         android:allowBackup="true"
@@ -22,7 +23,7 @@
         </activity>
         <service
             android:name="QuickSettingsService"
-            android:icon="@drawable/ic_android_black_24dp"
+            android:icon="@drawable/ic_lightbulb_outline_black_24dp"
             android:label="@string/tile_label"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
@@ -35,8 +36,6 @@
             android:exported="false">
 
             <intent-filter>
-                <!--protected-broadcast: Special broadcast that only the system can send-->
-                <!--Corresponds to: android.net.wifi.WifiManager.NETWORK_STATE_CHANGED_ACTION-->
                 <action android:name="android.net.wifi.STATE_CHANGE" />
             </intent-filter>
 

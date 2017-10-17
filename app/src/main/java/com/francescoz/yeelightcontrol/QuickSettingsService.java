@@ -14,8 +14,11 @@
 
 package com.francescoz.yeelightcontrol;
 
+import android.content.Intent;
+import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.BufferedOutputStream;
 import java.net.Socket;
@@ -23,13 +26,15 @@ import java.net.Socket;
 public class QuickSettingsService
         extends TileService {
 
+    public static final String INTENT_KEY_ENABLED = "enabled";
     private static final String PACKET_MESSAGE = "{\"id\":0x00000000036243b3,\"method\":\"toggle\",\"params\":[]}\r\n";
     private static final String PACKET_IP = "192.168.1.4";
     private static final int PACKET_PORT = 55443;
 
     @Override
     public void onClick() {
-        Log.d("QuickSettingsService", "onClick");
+        Log.d(this.getClass().getSimpleName(), "onClick");
+        Toast.makeText(this, "onClick", Toast.LENGTH_SHORT).show();
 
         new Thread(new Runnable() {
             @Override
@@ -46,6 +51,17 @@ public class QuickSettingsService
                 }
             }
         }).start();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(this.getClass().getSimpleName(), "onStartCommand");
+
+        boolean enabled = intent.getBooleanExtra(INTENT_KEY_ENABLED, false);
+        Tile tile = getQsTile();
+        tile.setState(enabled ? Tile.STATE_ACTIVE : Tile.STATE_UNAVAILABLE);
+        tile.updateTile();
+        return START_STICKY;
     }
 
     /*

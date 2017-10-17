@@ -1,6 +1,4 @@
 <resources>
     <string name="app_name">Yeelight Control</string>
-    <string name="tile_label">Balel</string>
-    <string name="service_inactive">Inactivia</string>
-    <string name="service_active">Activia</string>
+    <string name="tile_label">Bulb</string>
 </resources>
