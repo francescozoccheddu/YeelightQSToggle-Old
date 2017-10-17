@@ -53,10 +53,11 @@ public class QuickSettingsService
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(this.getClass().getSimpleName(), "onStartCommand");
+    public void onStartListening() {
+        setEnabled(WifiReceiver.isHome(this));
+    }
 
-        boolean enabled = intent.getBooleanExtra(INTENT_KEY_ENABLED, false);
+    private void setEnabled(boolean enabled) {
         Tile tile = getQsTile();
         if (enabled) {
             tile.setIcon(Icon.createWithResource(getApplicationContext(),
@@ -68,6 +69,18 @@ public class QuickSettingsService
             tile.setState(Tile.STATE_UNAVAILABLE);
         }
         tile.updateTile();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(this.getClass().getSimpleName(), "onStartCommand");
+        boolean enabled;
+        if (intent.hasExtra(INTENT_KEY_ENABLED))
+            enabled = intent.getBooleanExtra(INTENT_KEY_ENABLED, false);
+        else
+            enabled = WifiReceiver.isHome(this);
+        setEnabled(enabled);
+
         return START_STICKY;
     }
 
