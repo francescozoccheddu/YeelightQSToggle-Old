@@ -14,29 +14,40 @@ public class WifiReceiver extends BroadcastReceiver {
     private static final String SSID_HOME = "\"TISCALI-Zoccheddu\"";
 
     public static boolean isHome(WifiInfo wifiInfo) {
-        if (wifiInfo.getSupplicantState() == SupplicantState.COMPLETED)
-            return wifiInfo.getSSID().equals(SSID_HOME);
+        if (wifiInfo != null && wifiInfo.getSupplicantState() == SupplicantState.COMPLETED)
+        {
+            final String ssid = wifiInfo.getSSID();
+            if (ssid != null) {
+                return ssid.equals(SSID_HOME);
+            }
+        }
         return false;
     }
 
     public static boolean isHome(Context context) {
-        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-        return isHome(wifiInfo);
+        final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        if (wifiManager != null)
+        {
+            final WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+            return isHome(wifiInfo);
+        }
+        return false;
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(this.getClass().getSimpleName(), "onReceive");
-        NetworkInfo networkInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+
         boolean enabled = false;
+
+        final NetworkInfo networkInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
         if (networkInfo != null && networkInfo.isConnected()) {
-            WifiInfo wifiInfo = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
+            final WifiInfo wifiInfo = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
             enabled = isHome(wifiInfo);
         }
-        Intent mIntent = new Intent(context, QuickSettingsService.class);
+
+        final Intent mIntent = new Intent(context, QuickSettingsService.class);
         mIntent.putExtra(QuickSettingsService.INTENT_KEY_ENABLED, enabled);
         context.startService(mIntent);
-
     }
 }
