@@ -16,6 +16,8 @@ public class QuickSettingsService extends TileService {
     private static final String PACKET_IP = "192.168.1.4";
     private static final int PACKET_PORT = 55443;
 
+    private boolean tileActive;
+
     @Override
     public void onClick() {
         Log.d(this.getClass().getSimpleName(), "onClick");
@@ -41,38 +43,31 @@ public class QuickSettingsService extends TileService {
         new Thread(toggleRunnable).start();
     }
 
-    @Override
-    public void onStartListening() {
-        setEnabled(WifiReceiver.isHome(this));
+    private void updateTileState() {
+        Tile tile = getQsTile();
+        if (tile != null) {
+            tile.setIcon(Icon.createWithResource(getApplicationContext(), R.drawable.ic_tile));
+            tile.setState(tileActive ? Tile.STATE_ACTIVE : Tile.STATE_UNAVAILABLE);
+            tile.updateTile();
+        }
     }
 
-    private void setEnabled(boolean enabled) {
-        Tile tile = getQsTile();
-
-        if (enabled) {
-            tile.setState(Tile.STATE_ACTIVE);
-        } else {
-            tile.setState(Tile.STATE_UNAVAILABLE);
-        }
-
-        tile.updateTile();
+    @Override
+    public void onStartListening() {
+        updateTileState();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(this.getClass().getSimpleName(), "onStartCommand");
 
-        boolean enabled;
         if (intent.hasExtra(INTENT_KEY_ENABLED)) {
-            enabled = intent.getBooleanExtra(INTENT_KEY_ENABLED, false);
+            tileActive = intent.getBooleanExtra(INTENT_KEY_ENABLED, false);
         } else {
-            enabled = WifiReceiver.isHome(this);
+            tileActive = WifiReceiver.isHome(this);
         }
 
-        Tile tile = getQsTile();
-        tile.setIcon(Icon.createWithResource(getApplicationContext(), R.drawable.ic_tile));
-
-        setEnabled(enabled);
+        updateTileState();
 
         return START_STICKY;
     }
