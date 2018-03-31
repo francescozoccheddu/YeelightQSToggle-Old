@@ -43,7 +43,7 @@ public class QuickSettingsService extends TileService {
         new Thread(toggleRunnable).start();
     }
 
-    private void updateTileState() {
+    private void updateTile() {
         Tile tile = getQsTile();
         if (tile != null) {
             tile.setIcon(Icon.createWithResource(getApplicationContext(), R.drawable.ic_tile));
@@ -52,23 +52,31 @@ public class QuickSettingsService extends TileService {
         }
     }
 
+    private void updateState()
+    {
+        switch (WifiReceiver.getHomeState(this))
+        {
+            case NOT_HOME:
+                tileActive = false;
+                break;
+            case HOME:
+                tileActive = true;
+                break;
+            case UNKNOWN:
+                break;
+        }
+        updateTile();
+    }
+
     @Override
     public void onStartListening() {
-        updateTileState();
+        updateState();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(this.getClass().getSimpleName(), "onStartCommand");
-
-        if (intent.hasExtra(INTENT_KEY_ENABLED)) {
-            tileActive = intent.getBooleanExtra(INTENT_KEY_ENABLED, false);
-        } else {
-            tileActive = WifiReceiver.isHome(this);
-        }
-
-        updateTileState();
-
+        updateState();
         return START_STICKY;
     }
 

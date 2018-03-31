@@ -13,41 +13,35 @@ public class WifiReceiver extends BroadcastReceiver {
 
     private static final String SSID_HOME = "\"TISCALI-Zoccheddu\"";
 
-    public static boolean isHome(WifiInfo wifiInfo) {
+    public enum WifiHomeState {
+        HOME, NOT_HOME, UNKNOWN
+    }
+
+    public static WifiHomeState getHomeState(WifiInfo wifiInfo) {
         if (wifiInfo != null && wifiInfo.getSupplicantState() == SupplicantState.COMPLETED)
         {
             final String ssid = wifiInfo.getSSID();
             if (ssid != null) {
-                return ssid.equals(SSID_HOME);
+                return ssid.equals(SSID_HOME) ? WifiHomeState.HOME : WifiHomeState.NOT_HOME;
             }
         }
-        return false;
+        return WifiHomeState.UNKNOWN;
     }
 
-    public static boolean isHome(Context context) {
+    public static WifiHomeState getHomeState(Context context) {
         final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         if (wifiManager != null)
         {
             final WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-            return isHome(wifiInfo);
+            return getHomeState(wifiInfo);
         }
-        return false;
+        return WifiHomeState.UNKNOWN;
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(this.getClass().getSimpleName(), "onReceive");
-
-        boolean enabled = false;
-
-        final NetworkInfo networkInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-        if (networkInfo != null && networkInfo.isConnected()) {
-            final WifiInfo wifiInfo = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
-            enabled = isHome(wifiInfo);
-        }
-
         final Intent mIntent = new Intent(context, QuickSettingsService.class);
-        mIntent.putExtra(QuickSettingsService.INTENT_KEY_ENABLED, enabled);
         context.startService(mIntent);
     }
 }
