@@ -3,7 +3,6 @@ package com.francescoz.yeelightqstoggle;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -13,29 +12,28 @@ public class WifiReceiver extends BroadcastReceiver {
 
     private static final String SSID_HOME = "\"TISCALI-Zoccheddu\"";
 
-    public enum WifiHomeState {
-        HOME, NOT_HOME, UNKNOWN
-    }
-
     public static WifiHomeState getHomeState(WifiInfo wifiInfo) {
-        if (wifiInfo != null && wifiInfo.getSupplicantState() == SupplicantState.COMPLETED)
-        {
-            final String ssid = wifiInfo.getSSID();
-            if (ssid != null) {
-                return ssid.equals(SSID_HOME) ? WifiHomeState.HOME : WifiHomeState.NOT_HOME;
+        if (wifiInfo != null) {
+            if (wifiInfo.getSupplicantState() == SupplicantState.COMPLETED) {
+                final String ssid = wifiInfo.getSSID();
+                if (ssid != null && ssid.equals(SSID_HOME)) {
+                    return WifiHomeState.HOME;
+                }
             }
+            return WifiHomeState.NOT_HOME;
+        } else {
+            return WifiHomeState.UNKNOWN;
         }
-        return WifiHomeState.UNKNOWN;
     }
 
     public static WifiHomeState getHomeState(Context context) {
         final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        if (wifiManager != null)
-        {
+        if (wifiManager != null) {
             final WifiInfo wifiInfo = wifiManager.getConnectionInfo();
             return getHomeState(wifiInfo);
+        } else {
+            return WifiHomeState.UNKNOWN;
         }
-        return WifiHomeState.UNKNOWN;
     }
 
     @Override
@@ -43,5 +41,9 @@ public class WifiReceiver extends BroadcastReceiver {
         Log.d(this.getClass().getSimpleName(), "onReceive");
         final Intent mIntent = new Intent(context, QuickSettingsService.class);
         context.startService(mIntent);
+    }
+
+    public enum WifiHomeState {
+        HOME, NOT_HOME, UNKNOWN
     }
 }

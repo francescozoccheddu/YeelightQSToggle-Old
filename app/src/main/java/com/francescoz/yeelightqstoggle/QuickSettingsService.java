@@ -22,25 +22,29 @@ public class QuickSettingsService extends TileService {
     public void onClick() {
         Log.d(this.getClass().getSimpleName(), "onClick");
 
-        final Runnable toggleRunnable = new Runnable() {
+        if (tileActive) {
 
-            @Override
-            public void run() {
-                try {
-                    Socket socket = new Socket(PACKET_IP, PACKET_PORT);
-                    socket.setKeepAlive(true);
-                    BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(socket.getOutputStream());
-                    bufferedOutputStream.write(PACKET_MESSAGE.getBytes());
-                    bufferedOutputStream.flush();
-                    socket.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
+            final Runnable toggleRunnable = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        Socket socket = new Socket(PACKET_IP, PACKET_PORT);
+                        socket.setKeepAlive(true);
+                        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(socket.getOutputStream());
+                        bufferedOutputStream.write(PACKET_MESSAGE.getBytes());
+                        bufferedOutputStream.flush();
+                        socket.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
 
-        };
+            };
 
-        new Thread(toggleRunnable).start();
+            new Thread(toggleRunnable).start();
+
+        }
     }
 
     private void updateTile() {
@@ -52,10 +56,8 @@ public class QuickSettingsService extends TileService {
         }
     }
 
-    private void updateState()
-    {
-        switch (WifiReceiver.getHomeState(this))
-        {
+    private void updateState() {
+        switch (WifiReceiver.getHomeState(this)) {
             case NOT_HOME:
                 tileActive = false;
                 break;
@@ -76,6 +78,7 @@ public class QuickSettingsService extends TileService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(this.getClass().getSimpleName(), "onStartCommand");
+
         updateState();
         return START_STICKY;
     }
